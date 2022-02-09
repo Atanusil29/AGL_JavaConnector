@@ -5,6 +5,7 @@
 	<groupId>com.streamserve.javaconnectors</groupId>
 	<artifactId>JavaConnector</artifactId>
 	<version>0.1</version>
+	<packaging>jar</packaging>
 	<name>Custom Java connector</name>
 	<dependencies>
 		<dependency>

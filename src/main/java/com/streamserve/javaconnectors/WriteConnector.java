@@ -194,8 +194,8 @@ public class WriteConnector implements StrsConnectable {
 		}
 		
 		//Variable initialisation
-		final String webReportNameStatus = "MessageAzureServiceBus_WR";
-		final String webReportNameFetchDocID = "FetchDestinationID_WR";
+		final String webReportNameStatus = "AccelMessageAzureServiceBus_WR";
+		final String webReportNameFetchDocID = "AccelFetchDestinationID_WR";
 		String actionType = "";
 		String documentID = "";
 		String status = "";

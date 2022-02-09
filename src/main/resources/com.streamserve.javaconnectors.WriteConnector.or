@@ -1,16 +1,4 @@
-<Property title="Content Server URL" visible="1">
-    <Initial></Initial>
-    <Control>
-        <String/>
-    </Control>
-</Property>
-<Property title="Username" visible="1">
-    <Initial></Initial>
-    <Control>
-        <String/>
-    </Control>
-</Property>
-<Property title="Password" visible="1">
+<Property title="Configuration Folder" visible="1">
     <Initial></Initial>
     <Control>
         <String/>
@@ -58,19 +46,43 @@
         <String/>
     </Control>
 </Property>
-<Property title="Confirmation status" visible="1">
-    <Initial></Initial>
-    <Control>
-        <String/>
-    </Control>
-</Property>
 <Property title="Message ID" visible="1">
     <Initial></Initial>
     <Control>
         <String/>
     </Control>
 </Property>
+<Property title="Message Source" visible="1">
+    <Initial></Initial>
+    <Control>
+        <String/>
+    </Control>
+</Property>
+<Property title="Document Type" visible="1">
+    <Initial></Initial>
+    <Control>
+        <String/>
+    </Control>
+</Property>
+<Property title="Document Status" visible="1">
+    <Initial></Initial>
+    <Control>
+        <String/>
+    </Control>
+</Property>
 <Property title="Job status" visible="1">
+    <Initial></Initial>
+    <Control>
+        <String/>
+    </Control>
+</Property>
+<Property title="Validation variables" visible="1">
+    <Initial></Initial>
+    <Control>
+        <String/>
+    </Control>
+</Property>
+<Property title="Validation status" visible="1">
     <Initial></Initial>
     <Control>
         <String/>
