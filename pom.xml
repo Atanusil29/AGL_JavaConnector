@@ -40,7 +40,9 @@
 		<dependency>
 			<groupId>com.streamserve</groupId>
 			<artifactId>jstrs</artifactId>
-			<version>16.6.2_GA_324</version>
+			<version>16.6.2_GA_327</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/jstrs-16.6.2_GA_327.jar</systemPath>
 		</dependency>
 <!-- 		<dependency> -->
 <!-- 			<groupId>au.com.astral.exstream</groupId> -->

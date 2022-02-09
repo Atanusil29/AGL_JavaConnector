@@ -6,16 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -73,9 +66,6 @@ public class OTCSConnect {
 	private String categoryDoc = null;
 	private ArrayList<String> categoryDocKeys = new ArrayList<String>();
 	private ArrayList<String> categoryDocValues = new ArrayList<String>();
-
-	private SecretKeySpec secretKey;
-	private byte[] key;
 
 	/**
 	 * Read configuration file from server
@@ -221,7 +211,17 @@ public class OTCSConnect {
 	public String getOTCSTicketEncrypted() {
 
 		String msg;
-
+		
+		//Decrypt OTCS password
+		String decryptedPassword = null;
+		String PASSWORD = "Wnu9VGTh";
+		
+		try {
+			decryptedPassword = EncryptorAesGcmPassword.decrypt(csPassword, PASSWORD);
+		} catch (Exception e) {
+			LOG.error("getOTCSTicket : Post setup : Password decryption failed");
+		}
+		
 		// Create an http instance and set the url for authentication
 		HttpClient httpclient = HttpClients.createDefault();
 		HttpPost httppost = new HttpPost(contentServerURL + "/api/v1/auth");
@@ -231,7 +231,7 @@ public class OTCSConnect {
 		// Set username and decryptedpassword in body of POST call
 		List<NameValuePair> params = new ArrayList<NameValuePair>(2);
 		params.add(new BasicNameValuePair("username", csUsername));
-		params.add(new BasicNameValuePair("password", decrypt(csPassword)));
+		params.add(new BasicNameValuePair("password", decryptedPassword));
 
 		try {
 			httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
@@ -329,9 +329,9 @@ public class OTCSConnect {
 						LOG.error(msg);
 						return msg;
 					}
-					
-					dl = dl + "&" + parameters[i] + "=" + parValues[i];
 				}
+				
+				dl = dl + "&" + parameters[i] + "=" + parValues[i];
 			}
 			
 		} else {
@@ -814,50 +814,6 @@ public class OTCSConnect {
 	}
 
 	/**
-	 * Sets key object, used in password decryption
-	 * 
-	 * @param myKey: Password generation key
-	 */
-	private void setKey(String myKey) {
-		MessageDigest sha = null;
-		try {
-			key = myKey.getBytes("UTF-8");
-
-			sha = MessageDigest.getInstance("SHA-1");
-
-			key = sha.digest(key);
-			key = Arrays.copyOf(key, 16);
-			secretKey = new SecretKeySpec(key, "AES");
-
-		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-			LOG.error("Error setting decryption key ", e);
-		}
-	}
-
-	/**
-	 * Decrypts password string
-	 * 
-	 * @param strToDecrypt: Encrypted password
-	 * @return decrypted password as string, null on failure
-	 */
-	private String decrypt(String strToDecrypt) {
-		String secret = "Wnu9VGTh";
-		try {
-			setKey(secret);
-
-			Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-			cipher.init(Cipher.DECRYPT_MODE, secretKey);
-
-			return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
-
-		} catch (Exception e) {
-			LOG.debug("Error while decrypting: " + e.toString());
-		}
-
-		return null;
-	}
-
-	/**
 	 * Returns strings of equal length with every character being an asterisk
 	 * 
 	 * @param inputString Any string to convert
@@ -873,5 +829,4 @@ public class OTCSConnect {
 		}
 		return asteriskedString;
 	}
-
 }

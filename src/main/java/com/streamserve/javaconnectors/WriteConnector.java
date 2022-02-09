@@ -133,7 +133,7 @@ public class WriteConnector implements StrsConnectable {
 	//On connector startup, see if connector settings are entered
 		try {
 			readConfigVals(configVals);
-				m_service.writeMsg(StrsServiceable.MSG_INFO, 3, "Java Output connector : " + "Start up successful");
+				m_service.writeMsg(StrsServiceable.MSG_INFO, 3, "Java Output connector : " + "Start up successful...");
 				
 		} catch (Exception e) {			
 				m_service.writeMsg(StrsServiceable.MSG_ERROR, 0, "Java Output connector : " + ": " + e.getLocalizedMessage());
@@ -194,13 +194,14 @@ public class WriteConnector implements StrsConnectable {
 		}
 		
 		//Variable initialisation
-		final String webReportNameStatus = "MessageAzureServiceBus";
-		final String webReportNameFetchDocID = "FetchDestinationID";
+		final String webReportNameStatus = "MessageAzureServiceBus_WR";
+		final String webReportNameFetchDocID = "FetchDestinationID_WR";
 		String actionType = "";
 		String documentID = "";
 		String status = "";
 		String success = "";
-		String confirmationStatus= "GENERATE INITIATED";
+		String Status= "GENERATE INITIATED";
+		String WM_Document_Type  = "";
 		String errorCode= "";
 		String errorType= "";
 		String errorMessage= "";
@@ -213,11 +214,15 @@ public class WriteConnector implements StrsConnectable {
 		readConfigVals(configVals);	
 		
 		//Initialize web report values
-		String[] webReportParameters = new String[] { "TradeID", "DocName", "DocStatus" };
-		String[] webReportparValues = new String[] { csTradeID, csFilename, csDocumentStatus };
+		String[] webReportParameters = new String[] { "BoKey", "DocType" ,"DocName", "DocStatus" };
+		String[] webReportparValues = new String[] { csTradeID, csDocumentType, csFilename, csDocumentStatus };
 		
 		//Initialize category update parameters
 		String[] categoryValues = new String[] { csTrackerID, csTimestamp };
+		
+		//Determine WM_Document_Type category
+		if (csDocumentType.compareTo("Invoice") == 0) WM_Document_Type  = "Invoice";
+		else if (csDocumentType.compareTo("Confirmation") == 0) WM_Document_Type = "Trade Confirmation";
 		
 		//Create OTCSConnect object
 		OTCSConnect contentServerObject = new OTCSConnect();
@@ -294,7 +299,7 @@ public class WriteConnector implements StrsConnectable {
 			
 			//Add new document workflow
 			if(actionType.contentEquals("AddNewDoc")) {
-				documentID = contentServerObject.writeDocumentConnector(m_outStream, csFilename, csExtension, documentID, categoryValues, csDocumentType);
+				documentID = contentServerObject.writeDocumentConnector(m_outStream, csFilename, csExtension, documentID, categoryValues, WM_Document_Type);
 				if(documentID.contains("writeDocument")==false) {
 					m_service.writeMsg(StrsServiceable.MSG_INFO, 4, LOG_PREFIX + "New document added to Content Server");
 				} else {
@@ -342,18 +347,20 @@ public class WriteConnector implements StrsConnectable {
 			
 		//Set error information for Content Server Status Update
 		if (error.compareTo("0") == 0) {
-			success="true"; errorCode="250"; confirmationStatus= "CONFIRM CREATED";
+			success="true"; errorCode="250"; 
+			if (csDocumentType.compareTo("Invoice") == 0) 			Status= "INVOICE CREATED";
+			else if (csDocumentType.compareTo("Confirmation") == 0) Status= "CONFIRM CREATED";
 		} else if (error.compareTo("An Exstream error occured") == 0) {
-			success = "false"; errorCode="500"; errorType="EXSTR_GEN_ERROR"; confirmationStatus= "GENERATE FAILED";
+			success = "false"; errorCode="500"; errorType="EXSTR_GEN_ERROR"; Status= "GENERATE FAILED";
 		} else if (error.compareTo("JSON Validation unsuccessful") == 0) {
-			success = "false"; errorCode="550"; errorType="EXSTR_GEN_ERROR"; confirmationStatus= "GENERATE FAILED";
+			success = "false"; errorCode="550"; errorType="EXSTR_GEN_ERROR"; Status= "GENERATE FAILED";
 		}else {
-			success = "false"; errorCode="400"; errorType="EXSTR_GEN_ERROR"; confirmationStatus= "GENERATE FAILED";
+			success = "false"; errorCode="400"; errorType="EXSTR_GEN_ERROR"; Status= "GENERATE FAILED";
 		}
 		
 		//Initialize status update parameters
-		String[] statusUpdateParameters = new String[] { "TradeID","ConfirmationStatus","CommodityID","CommodityCode","MessageId","MessageSource","success","ErrorCode","ErrorType","ErrorMessage"};
-		String[] statusUpdateValues = new String[] { csTradeID, confirmationStatus,csCommodityID,csCommodityCode,csMessageID,csMessageSource,success,errorCode,errorType,errorMessage};
+		String[] statusUpdateParameters = new String[] { "BoKey","DocType","Status","CommodityID","CommodityCode","MessageId","MessageSource","success","ErrorCode","ErrorType","ErrorMessage"};
+		String[] statusUpdateValues = new String[] { csTradeID,csDocumentType, Status,csCommodityID,csCommodityCode,csMessageID,csMessageSource,success,errorCode,errorType,errorMessage};
 		
 		//Content Server Status Update
 		error = contentServerObject.getWebReport(webReportNameStatus, statusUpdateParameters, statusUpdateValues);
